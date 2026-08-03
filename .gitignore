@@ -1,0 +1,19 @@
+# Geodata — never commit
+data/*
+!data/README.md
+*.tif
+*.tiff
+*.nc
+*.grib
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Misc
+.DS_Store
+.env

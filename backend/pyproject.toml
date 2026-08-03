@@ -1,0 +1,26 @@
+[project]
+name = "sombrello"
+version = "0.1.0"
+description = "Shadow and UV prediction for GPX routes using DTM, CHM and solar position"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "gpxpy",
+    "pvlib",
+    "cdsapi",
+    "xarray",
+    "netcdf4",
+    "rasterio",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "httpx"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
