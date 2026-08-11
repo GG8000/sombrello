@@ -17,3 +17,6 @@ __pycache__/
 # Misc
 .DS_Store
 .env
+
+# Personal notes — not for the team repo
+docs/NEXT_STEPS_GEDEON.md

@@ -15,3 +15,5 @@ def test_sun_is_almost_overhead_at_the_equator_on_the_equinox():
 def test_azimuth_is_a_compass_bearing():
     pos = sun_position(*SALZBURG, datetime(2024,6,21,12, tzinfo=timezone.utc))
     assert 0 <= pos.azimuth_deg <= 360
+    
+    
