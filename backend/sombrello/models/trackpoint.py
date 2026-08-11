@@ -4,5 +4,5 @@ from datetime import datetime
 class Trackpoint(BaseModel):
     lat : float = Field(ge=-90, le=90)
     lon : float = Field(ge=-180, le=180)
-    elevation : float
+    elevation_m : float
     timestamp : datetime
