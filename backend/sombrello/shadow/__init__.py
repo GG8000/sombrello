@@ -1,9 +1,11 @@
 from collections.abc import Sequence
 
+from sombrello.solar.solar import SolarPosition, sun_position
 from sombrello.models.trackpoint import Trackpoint
 
 
 def shadow_index(tp : Trackpoint) -> float:
+    sun_pos : SolarPosition = sun_position(tp.lat, tp.lon, tp.timestamp)
     # Need to return a value between 0.0 and 1.0
     # TODO Need to be implemented, at the moment it is just a stub
     return 0.5

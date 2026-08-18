@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime, timezone
+from sombrello.solar.solar import sun_position
 from sombrello.shadow import shadow_index, shadow_index_many
 from sombrello.models.trackpoint import Trackpoint
 import random

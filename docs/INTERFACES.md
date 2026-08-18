@@ -3,7 +3,7 @@
 Define these BEFORE implementing. Both team members must agree on any change.
 
 ## 1. Trackpoint
-`{lat: float, lon: float, elevation: float, timestamp: ISO-8601 UTC}`
+`{lat: float, lon: float, elevation_m: float, timestamp: ISO-8601 UTC}`
 
 ## 2. Solar output (Gedeon -> Emil)
 `{azimuth_deg: float, elevation_deg: float}` per trackpoint/timestamp
