@@ -14,7 +14,7 @@ Canopy Height Models, solar position and CAMS UV forecasts.
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-uvicorn sombrello.api.main:app --reload
+python -m uvicorn sombrello.api.main:app --reload
 ```
 
 ## Team

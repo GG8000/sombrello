@@ -1,8 +1,5 @@
-from datetime import datetime
-
 import pytest
 from fastapi.testclient import TestClient
-
 from sombrello.api.main import app
 
 @pytest.fixture
@@ -45,7 +42,7 @@ def test_get_route_returns_enriched_trackpoints(client):
     
 def test_unknown_route_returns_404(client):
     response = client.get("/routes/does-not-exist")
-    return response.status_code == 404
+    assert response.status_code == 404
     
 
 def test_invalid_latitude_returns_422(client):

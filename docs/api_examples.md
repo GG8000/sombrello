@@ -1,6 +1,6 @@
 # API Usage Examples
 
-Start server from root directory sombrello/ with: `uvicorn backend.sombrello.api.main:app --reload`
+Start server from root directory sombrello/ with: `python -m uvicorn sombrello.api.main:app --reload`
 
 # Add Route
 This function is called, when we add a route to the dataset and this is then saved for the whole session with a unique ID
