@@ -1,17 +1,436 @@
-<!DOCTYPE html>
-<!--
-  Sombrello Demonstrator Frontend
-  NOTE: This frontend is a single static HTML file and is AI-GENERATED.
-  It serves only as a demonstrator for the Sombrello backend API.
--->
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sombrello — Shadow & UV Route Demonstrator</title>
-</head>
-<body>
-    <h1>Sombrello Demonstrator</h1>
-    <p>Placeholder — map, time slider and charts will be added here.</p>
-</body>
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sombrello GPX Viewer</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gluten:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Modernes Layout mit Flexbox */
+      body {
+        font-family: serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden; /* Verhindert Seiten-Scrollen */
+      }
+
+      .heading {
+        font-family: "Instrument serif";
+        font-size: 3rem;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Neuer Footer Style */
+      /* Der Footer selbst (falls noch nicht angepasst) */
+      footer {
+        display: flex;
+        justify-content: space-between; /* Zieht Logos an den Rand, Text in die Mitte */
+        align-items: center;
+        background: white;
+        border-top: 1px solid #dee2e6;
+        padding: 15px 30px;
+        min-height: 40px;
+      }
+
+      .gluten-regular {
+        font-family: "Gluten", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      .footer-contribution {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        max-width: 50%; /* Verhindert, dass der Text zu breit wird */
+        gap: 4px; /* Leichter Abstand zwischen Namen und Text */
+      }
+
+      /* Standard-Abstände der p-Tags entfernen */
+      .footer-contribution p {
+        margin: 0;
+      }
+
+      .footer-contribution a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      /* Hervorhebung der Namen */
+      .footer-names {
+        font-weight: bold;
+        color: #333;
+        font-size: 14px;
+      }
+
+      /* Dezente Formatierung für den langen Fördertext */
+      .footer-funding {
+        font-size: 11px;
+        color: #666;
+        line-height: 1.4;
+      }
+
+      .logo-placeholder {
+        width: 120px;
+        height: 40px;
+        background: #e0e0e0;
+        color: #555;
+        text-align: center;
+        line-height: 40px;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+
+      /* Oben: Header */
+      header {
+        background: #3a6b54;
+        color: white;
+        padding: 15px 20px;
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 1px;
+      }
+
+      /* Mitte: Geteilter Bereich (Karte + Menü) */
+      .content {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .upload-container {
+        display: flex;
+        justify-content: flex-end; /* Schiebt den Inhalt nach rechts */
+        width: 100%;
+      }
+
+      /* Links: Karte */
+      .map-section {
+        flex: 3;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+      }
+      #map {
+        flex: 1;
+        border-radius: 8px;
+        margin-block: 10px;
+        border: 1px solid #ccc;
+      }
+
+      /* Rechts: Statistiken & API */
+      .sidebar {
+        flex: 1;
+        background: #f8f9fa;
+        padding: 10px 20px;
+        border-left: 1px solid #dee2e6;
+        overflow-y: auto;
+      }
+      .stat-box {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 10px;
+      }
+
+      .gpx-input {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: #3a6b54;
+        color: white;
+        border: 2px solid transparent;
+        border-radius: 5px;
+        font-size: 16px;
+        text-align: center;
+        cursor: pointer;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+      }
+
+      .gpx-input:hover {
+        background: white;
+        color: #3a6b54;
+        border: 2px solid #3a6b54;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #3a6b54;
+        color: white;
+        border: 2px solid transparent; /* solid und transparent hinzugefügt */
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: white;
+        color: #3a6b54;
+        border: 2px solid #3a6b54; /* solid hinzugefügt */
+      }
+      button:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        color: white;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="heading">Sombrello-Demo</header>
+
+    <div class="content">
+      <!-- Linker Bereich: Upload & Karte -->
+      <div class="map-section">
+        <div id="map"></div>
+        <div class="upload-container">
+          <label for="gpxInput" class="gpx-input"> Select GPX Route </label>
+          <input
+            type="file"
+            id="gpxInput"
+            accept=".gpx"
+            style="display: none"
+          />
+        </div>
+      </div>
+
+      <!-- Rechter Bereich: Sidebar -->
+      <div class="sidebar">
+        <h2>Route-Statistics</h2>
+        <div class="stat-box">
+          <p>
+            <strong>Name: </strong
+            ><span id="route-name">I am not gonna tell</span>
+          </p>
+        </div>
+        <div class="stat-box">
+          <p><strong>Distance:</strong> <span id="stat-dist">--</span> km</p>
+          <p>
+            <strong>Elevation Gain:</strong> <span id="stat-ele">--</span> m
+          </p>
+          <p>
+            <strong>Duration:</strong> <span id="stat-time">--</span> min
+          </p>
+        </div>
+        <div class="stat-box">
+          <p>
+            <strong>Avg Shadow Time: </strong>
+            <span id="stat-shadow">--</span> %
+          </p>
+          <p>
+            <strong>Average UV Index: </strong>
+            <span id="stat-avg-uv-idx">--</span> 
+          </p>
+          <p>
+            <strong>Peak UV Index: </strong> <span id="stat-uv-peak">--</span>
+          </p>
+          <p>
+            <strong>Duration in Shadow:</strong>
+            <span id="stat-shadow-time">--</span> min
+          </p>
+        </div>
+
+        <button id="apiBtn" disabled>Calculate Shadow</button>
+      </div>
+    </div>
+
+    <!-- NEU: Footer mit Logos -->
+    <footer>
+      <img src="public/cde_master.png" height="40" alt="CDE Logo" />
+      <img src="public/plus_logo.jpg" height="40" alt="PLUS Logo" />
+
+      <div class="footer-contribution">
+        <p class="footer-names">
+          <a href="https://sokhymi.github.io/" target="_blank">
+            Bilegjargal Bold</a
+          >,
+          <a href="https://gedeonigelspacher.vercel.app/" target="_blank">
+            Gedeon Robert Paul Igelspacher
+          </a>
+        </p>
+        <p class="footer-funding">
+          This research is co-funded by the European Union to engage in the
+          Copernicus Master in Digital Earth, an Erasmus Mundus Joint Master
+          (EMJM), project reference: 101128006, 2023-2029.
+        </p>
+      </div>
+
+      <img src="public/UBS.jpeg" height="40" alt="UBS Logo" />
+      <img src="public/eu_co_funded.jpg" height="40" alt="EU Logo" />
+    </footer>
+
+    <!-- Leaflet & GPX Plugin -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+    <script>
+      fetch("public/geoBoundaries-DEU-ADM1.geojson")
+        .then((res) => res.json())
+        .then((bwData) => {
+          const bwFeature = bwData.features ? bwData.features[0] : bwData;
+          const masked = turf.mask(bwFeature);
+
+          L.geoJSON(masked, {
+            style: {
+              color: "transparent",
+              fillColor: "#000000",
+              fillOpacity: 0.6,
+            },
+          }).addTo(map);
+        });
+      const map = L.map("map").setView([48.52, 9.05], 10);
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        {
+          attribution: "© OpenStreetMap contributors © CARTO",
+        },
+      ).addTo(map);
+
+      let currentGpxData = null; // Speichert den rohen Datei-Inhalt für die API
+
+      // 1. GPX Hochladen und anzeigen
+      document
+        .getElementById("gpxInput")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            currentGpxData = event.target.result;
+            document.getElementById("apiBtn").disabled = false; // API-Button aktivieren
+
+            new L.GPX(currentGpxData, {
+              async: true,
+              polyline_options: {
+                color: "#3A6B54", // Hier die Linienfarbe ändern
+                weight: 5, // Liniendicke (optional)
+                opacity: 0.8, // Deckkraft (optional)
+              },
+              marker_options: {
+                startIconUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-icon-start.png",
+                endIconUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-icon-end.png",
+                shadowUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-shadow.png",
+              },
+            })
+              .on("loaded", function (e) {
+                map.fitBounds(e.target.getBounds());
+
+                // Get Name
+                document.getElementById("route-name").innerText =
+                  e.target.get_name();
+                // Statistiken automatisch eintragen
+                document.getElementById("stat-dist").innerText = (
+                  e.target.get_distance() / 1000
+                ).toFixed(2);
+                document.getElementById("stat-ele").innerText = e.target
+                  .get_elevation_gain()
+                  .toFixed(0);
+                document.getElementById("stat-time").innerText =
+                  (e.target.get_total_time() / 60000).toFixed(0);
+              })
+              .addTo(map);
+          };
+          reader.readAsText(file);
+        });
+
+      let shadowLayer = null;
+
+      function drawShadowRoute(enriched) {
+        if (shadowLayer) map.removeLayer(shadowLayer);
+        shadowLayer = L.layerGroup().addTo(map);
+
+        for (let i = 0; i < enriched.length - 1; i++) {
+          const a = enriched[i], b = enriched[i + 1];
+          L.polyline([[a.lat, a.lon], [b.lat, b.lon]], {
+            color: shadowColor(a.shadow_index),
+            weight: 6,
+            opacity: 0.9,
+          }).addTo(shadowLayer);
+        }
+      }
+
+      function shadowColor(index) {
+        if (index >= 0.75) return "#2c3e6b";
+        if (index >= 0.5)  return "#4a7fb8";
+        if (index >= 0.25) return "#e8b33a";
+        return "#e86a2a";
+      }
+
+      function calc_stats(enriched) {
+        let avgUVIndex = 0;
+        let avgShadow = 0;
+        let maxUV = -100;
+        let shadowDuration = 0;
+        for (let i = 0; i < enriched.length - 1; i++) {
+          const a = enriched[i], b = enriched[i + 1];
+          avgUVIndex += a.uv_index;
+          avgShadow += a.shadow_index;
+          if (a.uv_index > maxUV) {
+            maxUV = a.uv_index.toFixed(0);
+          }
+          if (a.shadow_index == 1) {
+            const d1 = new Date(a.timestamp);
+            const d2 = new Date(b.timestamp);
+            const timeDiffInMs = Math.abs(d2-d1);
+            shadowDuration += timeDiffInMs
+          }
+      }
+
+      return [(avgUVIndex / enriched.length).toFixed(0), (avgShadow / enriched.length * 100).toFixed(2), maxUV, (shadowDuration / 60000).toFixed(0)]
+    }
+
+      // 2. API Request an deinen Server
+      document.getElementById("apiBtn").addEventListener("click", async function () {
+        if (!currentGpxData) return;
+
+        const routesURL = "http://127.0.0.1:8000/routes";
+
+        try {
+          const created = await fetch(routesURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/xml" },
+            body: currentGpxData,
+          });
+          if (!created.ok) throw new Error(`Upload fehlgeschlagen: ${created.status}`);
+
+          const { route_id } = await created.json();
+
+          const enrichedResponse = await fetch(`http://127.0.0.1:8000/routes/${route_id}/json`);
+          const enriched = await enrichedResponse.json();
+
+          drawShadowRoute(enriched);
+          const [avgUV, avgShadow, maxUV, shadowTime] = calc_stats(enriched)
+          document.getElementById("stat-shadow").innerText = avgShadow
+          document.getElementById("stat-avg-uv-idx").innerText = avgUV
+          document.getElementById("stat-uv-peak").innerText = maxUV
+          document.getElementById("stat-shadow-time").innerText = shadowTime
+
+        } catch (error) {
+          console.error("API Error:", error);
+        }
+      });
+    </script>
+  </body>
 </html>

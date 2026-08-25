@@ -7,3 +7,9 @@ class Trackpoint(BaseModel):
     elevation_m : float = Field(ge=-500)
     timestamp : datetime
     
+class TrackpointEnriched(Trackpoint):
+    sun_elevation_deg: float
+    shadow_index: float = Field(ge=0.0, le=1.0)
+    uv_index: float = Field(ge=0.0)
+    uv_effective: float = Field(ge=0.0)
+    

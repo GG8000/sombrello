@@ -9,7 +9,7 @@ Define these BEFORE implementing. Both team members must agree on any change.
 `{azimuth_deg: float, elevation_deg: float}` per trackpoint/timestamp
 
 ## 3. Shadow output (Emil -> API)
-`shadow_index: float` in [0.0, 1.0] per trackpoint
+`shadow_index: float` in [0.0, 1.0] per trackpoint -> 0 - no shadow, 1 - shadow
 
 ## 4. GPX extensions
 Namespaced extensions carrying `shadow_index` and `uv_effective`.

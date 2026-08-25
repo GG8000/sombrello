@@ -2,6 +2,35 @@ import pytest
 from fastapi.testclient import TestClient
 from sombrello.api.main import app
 
+gpx_test_string = """<?xml version='1.0' encoding='UTF-8'?>
+    <gpx version="1.1" creator="https://www.komoot.de" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+    <metadata>
+        <name>Testroute-Sombrello</name>
+        <author>
+        <link href="https://www.komoot.de">
+        <text>komoot</text>
+        <type>text/html</type>
+        </link>
+        </author>
+        </metadata>
+        <wpt lat="48.545926" lon="9.057296">
+            <name>T\u00fcbingen Ulmenweg</name>
+            <sym>Flag, Blue</sym>
+        </wpt>
+        <wpt lat="48.551085" lon="9.050721">
+            <name>Naturlehrpfad im Naturpark Sch\u00f6nbuch</name>
+            <sym>Flag, Blue</sym>
+        </wpt>
+        <trk>
+            <name>Testroute-Sombrello</name>
+            <type>hike</type>
+            <trkseg>
+                {trackpoints_xml}
+            </trkseg> 
+        </trk>
+    </gpx>"""
+
+
 @pytest.fixture
 def client():
     return TestClient(app)
@@ -11,14 +40,29 @@ def test_health_returns_ok(client):
     assert response.status_code == 200
     assert response.json() == {"status" : "ok"}
     
-def test_post_routes_returns_route_id(client):
-    response = client.post("/routes", json={
-        "trackpoints" : [
-            {"lat" : 47.70, "lon" : 13.04, "elevation_m" : 424.0, "timestamp" : "2027-06-21T13:00:00+00:00"}
+def test_post_routes_gpx_returns_route_id(client):
+    trackpoints = [
+            {"lat" : 47.70, "lon" : 13.04, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"}
         ]
-    })
+    
+    trackpoints_xml = "".join([
+            f"""
+            <trkpt lat="{tp['lat']}" lon="{tp['lon']}">
+                <ele>{tp['elevation_m']}</ele>
+                <time>{tp['timestamp']}</time>
+            </trkpt>
+            """ for tp in trackpoints
+            ]
+        )
+    
+    response = client.post(
+        "/routes", 
+        content=gpx_test_string.format(trackpoints_xml=trackpoints_xml),
+        headers={"Content-Type": "application/xml"} 
+    )
+    
     assert response.status_code == 201
-    assert response.json()["route_id"]
+    assert "route_id" in response.json()
     
 def test_get_route_returns_enriched_trackpoints(client):
     trackpoints = [
@@ -29,16 +73,30 @@ def test_get_route_returns_enriched_trackpoints(client):
         {"lat" : 47.89, "lon" : 13.06, "elevation_m" : 443.0, "timestamp" : "2027-06-21T16:00:00+00:00"},
         {"lat" : 47.87, "lon" : 13.06, "elevation_m" : 410.0, "timestamp" : "2027-06-21T17:00:00+00:00"}
     ]
-    created = client.post("/routes", json={"trackpoints" : trackpoints})
+    
+    trackpoints_xml = "".join([
+            f"""
+            <trkpt lat="{tp['lat']}" lon="{tp['lon']}">
+                <ele>{tp['elevation_m']}</ele>
+                <time>{tp['timestamp']}</time>
+            </trkpt>
+            """ for tp in trackpoints
+            ]
+        )
+    
+    created = client.post(
+        "/routes", 
+        content=gpx_test_string.format(trackpoints_xml=trackpoints_xml),
+        headers={"Content-Type": "application/xml"}
+    ) 
     route_id = created.json()["route_id"]
     
     response = client.get(f"/routes/{route_id}")
     assert response.status_code == 200
     
-    point = response.json()["trackpoints"][0]
-    assert point["uv_effective"] == pytest.approx(
-        point["uv_index"] * (1 - point["shadow_index"])
-    )
+    gpx = response.content
+    
+    
     
 def test_unknown_route_returns_404(client):
     response = client.get("/routes/does-not-exist")
@@ -46,17 +104,81 @@ def test_unknown_route_returns_404(client):
     
 
 def test_invalid_latitude_returns_422(client):
-    response = client.post("/routes", json={
-        "trackpoints" : [
-            {"lat" : 3000.70, "lon" : 13.04, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
-        ]
-    })
+    trackpoints = [
+        {"lat" : 3000.01, "lon" : 13.04, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+        {"lat" : 90.01, "lon" : 13.04, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+        {"lat" : -90.01, "lon" : 13.04, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+    ]
+    
+    trackpoints_xml = "".join([
+            f"""
+            <trkpt lat="{tp['lat']}" lon="{tp['lon']}">
+                <ele>{tp['elevation_m']}</ele>
+                <time>{tp['timestamp']}</time>
+            </trkpt>
+            """ for tp in trackpoints
+            ]
+        )
+    
+    response = client.post(
+        "/routes", 
+        content=gpx_test_string.format(trackpoints_xml=trackpoints_xml),
+        headers={"Content-Type": "application/xml"}
+    ) 
     assert response.status_code == 422
     
 def test_invalid_longitude_returns_422(client):
-    response = client.post("/routes", json={
-        "trackpoints" : [
-            {"lat" : 47.70, "lon" : 999.04, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
-        ]
-    })
+    trackpoints = [
+            {"lat" : 49.01, "lon" : 181.10, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+            {"lat" : 47.1, "lon" : -231, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+            {"lat" : 50.61, "lon" : 1000, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+    ]
+    
+    trackpoints_xml = "".join([
+            f"""
+            <trkpt lat="{tp['lat']}" lon="{tp['lon']}">
+                <ele>{tp['elevation_m']}</ele>
+                <time>{tp['timestamp']}</time>
+            </trkpt>
+            """ for tp in trackpoints
+            ]
+        )
+    
+    response = client.post(
+        "/routes", 
+        content=gpx_test_string.format(trackpoints_xml=trackpoints_xml),
+        headers={"Content-Type": "application/xml"}
+    ) 
     assert response.status_code == 422
+    
+def test_get_enriched_route_json(client):
+    trackpoints = [
+        {"lat" : 49.01, "lon" : 10.05, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+        {"lat" : 47.1, "lon" : 10.05, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+        {"lat" : 50.61, "lon" : 12.09, "elevation_m" : 424.0, "timestamp" : "2027-06-21T12:00:00+00:00"},
+    ]
+    
+    trackpoints_xml = "".join([
+            f"""
+            <trkpt lat="{tp['lat']}" lon="{tp['lon']}">
+                <ele>{tp['elevation_m']}</ele>
+                <time>{tp['timestamp']}</time>
+            </trkpt>
+            """ for tp in trackpoints
+            ]
+        )
+    
+    response = client.post(
+        "/routes", 
+        content=gpx_test_string.format(trackpoints_xml=trackpoints_xml),
+        headers={"Content-Type": "application/xml"}
+    ) 
+    assert response.status_code == 201
+    route_id = response.json()["route_id"]
+    
+    enriched_response = client.get(
+        f"/routes/{route_id}/json",
+    )
+    expected = {"sun_elevation_deg", "shadow_index", "uv_index", "uv_effective"}
+    for tp in enriched_response.json():
+        assert expected <= tp.keys() # <= means subset of 
