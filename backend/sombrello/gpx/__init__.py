@@ -8,6 +8,14 @@ import gpxpy.gpx
 from lxml import etree
 
 def gpx_to_trackpoint_list(gpx_string : str) -> list[Trackpoint]:
+    """Takes the route and enrich it with the shadow data that is comupted in backend
+            Args:
+                id (uuid4): route id to get it from the memory
+            Returns:
+                Response (xml): enriched gpx data as xml
+            Raises:
+                HTTPException: If route id is not found in memory
+            """
     gpx = gpxpy.parse(gpx_string)
     
     trackpoints = []

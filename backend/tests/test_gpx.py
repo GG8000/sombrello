@@ -66,3 +66,4 @@ def test_gpx_roundtrip_preserves_trackpoints():
     gpx = trackpoints_to_gpx(trackpoints=enriched, gpx_string=gpx_test_string)
     result = gpx_to_trackpoint_list(gpx_string=gpx)
     assert result == original
+    

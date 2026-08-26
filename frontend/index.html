@@ -14,7 +14,6 @@
       rel="stylesheet"
     />
     <style>
-      /* Modernes Layout mit Flexbox */
       body {
         font-family: serif;
         margin: 0;
@@ -22,7 +21,7 @@
         display: flex;
         flex-direction: column;
         height: 100vh;
-        overflow: hidden; /* Verhindert Seiten-Scrollen */
+        overflow: hidden;
       }
 
       .heading {
@@ -34,11 +33,9 @@
         align-items: center;
       }
 
-      /* Neuer Footer Style */
-      /* Der Footer selbst (falls noch nicht angepasst) */
       footer {
         display: flex;
-        justify-content: space-between; /* Zieht Logos an den Rand, Text in die Mitte */
+        justify-content: space-between; 
         align-items: center;
         background: white;
         border-top: 1px solid #dee2e6;
@@ -56,11 +53,10 @@
         display: flex;
         flex-direction: column;
         text-align: center;
-        max-width: 50%; /* Verhindert, dass der Text zu breit wird */
-        gap: 4px; /* Leichter Abstand zwischen Namen und Text */
+        max-width: 50%; 
+        gap: 4px; 
       }
 
-      /* Standard-Abstände der p-Tags entfernen */
       .footer-contribution p {
         margin: 0;
       }
@@ -70,14 +66,12 @@
         text-decoration: none;
       }
 
-      /* Hervorhebung der Namen */
       .footer-names {
         font-weight: bold;
         color: #333;
         font-size: 14px;
       }
 
-      /* Dezente Formatierung für den langen Fördertext */
       .footer-funding {
         font-size: 11px;
         color: #666;
@@ -95,7 +89,6 @@
         font-weight: bold;
       }
 
-      /* Oben: Header */
       header {
         background: #3a6b54;
         color: white;
@@ -105,7 +98,6 @@
         letter-spacing: 1px;
       }
 
-      /* Mitte: Geteilter Bereich (Karte + Menü) */
       .content {
         display: flex;
         flex: 1;
@@ -114,11 +106,11 @@
 
       .upload-container {
         display: flex;
-        justify-content: flex-end; /* Schiebt den Inhalt nach rechts */
+        justify-content: flex-end; 
         width: 100%;
       }
 
-      /* Links: Karte */
+      
       .map-section {
         flex: 3;
         display: flex;
@@ -132,7 +124,7 @@
         border: 1px solid #ccc;
       }
 
-      /* Rechts: Statistiken & API */
+      
       .sidebar {
         flex: 1;
         background: #f8f9fa;
@@ -174,7 +166,7 @@
         padding: 12px;
         background: #3a6b54;
         color: white;
-        border: 2px solid transparent; /* solid und transparent hinzugefügt */
+        border: 2px solid transparent; 
         border-radius: 5px;
         font-size: 16px;
         cursor: pointer;
@@ -183,7 +175,7 @@
       button:hover {
         background: white;
         color: #3a6b54;
-        border: 2px solid #3a6b54; /* solid hinzugefügt */
+        border: 2px solid #3a6b54;
       }
       button:disabled {
         background: #bdc3c7;
@@ -197,7 +189,6 @@
     <header class="heading">Sombrello-Demo</header>
 
     <div class="content">
-      <!-- Linker Bereich: Upload & Karte -->
       <div class="map-section">
         <div id="map"></div>
         <div class="upload-container">
@@ -211,7 +202,6 @@
         </div>
       </div>
 
-      <!-- Rechter Bereich: Sidebar -->
       <div class="sidebar">
         <h2>Route-Statistics</h2>
         <div class="stat-box">
@@ -251,7 +241,6 @@
       </div>
     </div>
 
-    <!-- NEU: Footer mit Logos -->
     <footer>
       <img src="public/cde_master.png" height="40" alt="CDE Logo" />
       <img src="public/plus_logo.jpg" height="40" alt="PLUS Logo" />
@@ -276,12 +265,12 @@
       <img src="public/eu_co_funded.jpg" height="40" alt="EU Logo" />
     </footer>
 
-    <!-- Leaflet & GPX Plugin -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
     <script>
+      // We focused on the region of Baden-Württemberg, so we load GeoJSON of BaWü, and surroundings are black 
       fetch("public/geoBoundaries-DEU-ADM1.geojson")
         .then((res) => res.json())
         .then((bwData) => {
@@ -316,14 +305,14 @@
           const reader = new FileReader();
           reader.onload = function (event) {
             currentGpxData = event.target.result;
-            document.getElementById("apiBtn").disabled = false; // API-Button aktivieren
+            document.getElementById("apiBtn").disabled = false; 
 
             new L.GPX(currentGpxData, {
               async: true,
               polyline_options: {
-                color: "#3A6B54", // Hier die Linienfarbe ändern
-                weight: 5, // Liniendicke (optional)
-                opacity: 0.8, // Deckkraft (optional)
+                color: "#3A6B54", 
+                weight: 5, 
+                opacity: 0.8,
               },
               marker_options: {
                 startIconUrl:
@@ -340,7 +329,7 @@
                 // Get Name
                 document.getElementById("route-name").innerText =
                   e.target.get_name();
-                // Statistiken automatisch eintragen
+                // Get stats from file itself
                 document.getElementById("stat-dist").innerText = (
                   e.target.get_distance() / 1000
                 ).toFixed(2);
@@ -356,8 +345,9 @@
         });
 
       let shadowLayer = null;
-
+      
       function drawShadowRoute(enriched) {
+        /*Draw a two colored gpx route with the enriched data, blue for shadow, orange for sun*/
         if (shadowLayer) map.removeLayer(shadowLayer);
         shadowLayer = L.layerGroup().addTo(map);
 
@@ -372,13 +362,14 @@
       }
 
       function shadowColor(index) {
-        if (index >= 0.75) return "#2c3e6b";
-        if (index >= 0.5)  return "#4a7fb8";
-        if (index >= 0.25) return "#e8b33a";
+        /* Assign color to shadow index */
+        if (index == 1) return "#2c3e6b";
+        if (index < 1) return "#e8b33a";
         return "#e86a2a";
       }
 
-      function calc_stats(enriched) {
+      function update_shadow_stats(enriched) {
+        /* Calculate the statistics from the enriched route */
         let avgUVIndex = 0;
         let avgShadow = 0;
         let maxUV = -100;
@@ -398,34 +389,38 @@
           }
       }
 
-      return [(avgUVIndex / enriched.length).toFixed(0), (avgShadow / enriched.length * 100).toFixed(2), maxUV, (shadowDuration / 60000).toFixed(0)]
+      document.getElementById("stat-shadow").innerText = (avgShadow / enriched.length * 100).toFixed(2)
+      document.getElementById("stat-avg-uv-idx").innerText = (avgUVIndex / enriched.length).toFixed(0)
+      document.getElementById("stat-uv-peak").innerText = maxUV
+      document.getElementById("stat-shadow-time").innerText = (shadowDuration / 60000).toFixed(0)
+      
     }
 
-      // 2. API Request an deinen Server
+      // API Request to the backend
       document.getElementById("apiBtn").addEventListener("click", async function () {
         if (!currentGpxData) return;
 
-        const routesURL = "http://127.0.0.1:8000/routes";
+        const routesURL = "http://127.0.0.1:8000/routes"; // Still hardcoded with experimental setup
 
         try {
+          // Send request to save route
           const created = await fetch(routesURL, {
             method: "POST",
             headers: { "Content-Type": "application/xml" },
             body: currentGpxData,
           });
-          if (!created.ok) throw new Error(`Upload fehlgeschlagen: ${created.status}`);
-
+          if (!created.ok) throw new Error(`Upload failed: ${created.status}`);
+          // Get route_id from the backend
           const { route_id } = await created.json();
 
+          // Query enriched route with route_id
           const enrichedResponse = await fetch(`http://127.0.0.1:8000/routes/${route_id}/json`);
           const enriched = await enrichedResponse.json();
 
+          // draw new gpx route with the enriched data and update shadow stats
           drawShadowRoute(enriched);
-          const [avgUV, avgShadow, maxUV, shadowTime] = calc_stats(enriched)
-          document.getElementById("stat-shadow").innerText = avgShadow
-          document.getElementById("stat-avg-uv-idx").innerText = avgUV
-          document.getElementById("stat-uv-peak").innerText = maxUV
-          document.getElementById("stat-shadow-time").innerText = shadowTime
+          update_shadow_stats(enriched);
+          
 
         } catch (error) {
           console.error("API Error:", error);
