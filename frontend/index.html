@@ -161,6 +161,20 @@
         border: 2px solid #3a6b54;
       }
 
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .sun { animation: peek 3s ease-in-out infinite; }
+      .cloud { animation: drift 3s ease-in-out infinite; }
+      @keyframes peek { 0%,15%{transform:translateX(0) translateY(0);} 40%,60%{transform:translateX(-14px) translateY(6px);} 85%,100%{transform:translateX(0) translateY(0);} }
+      @keyframes drift { 0%,15%{transform:translateX(0);} 40%,60%{transform:translateX(6px);} 85%,100%{transform:translateX(0);} }
+
       button {
         width: 100%;
         padding: 12px;
@@ -187,7 +201,16 @@
   </head>
   <body>
     <header class="heading">Sombrello-Demo</header>
-
+    <div id="overlay" class="overlay">
+      <svg viewBox="0 0 120 100" width="200" height="125">
+        <circle class="sun" cx="55" cy="42" r="20" fill="#F0997B"/>
+        <g class="cloud">
+          <ellipse cx="60" cy="55" rx="30" ry="16" fill="#B4B2A9"/>
+          <ellipse cx="42" cy="50" rx="16" ry="13" fill="#B4B2A9"/>
+          <ellipse cx="78" cy="50" rx="18" ry="14" fill="#B4B2A9"/>
+        </g>
+      </svg>
+    </div>
     <div class="content">
       <div class="map-section">
         <div id="map"></div>
@@ -287,9 +310,10 @@
         });
       const map = L.map("map").setView([48.52, 9.05], 10);
       L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.{ext}",
         {
-          attribution: "© OpenStreetMap contributors © CARTO",
+          ext: "png",
+          attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         },
       ).addTo(map);
 
@@ -399,6 +423,8 @@
       // API Request to the backend
       document.getElementById("apiBtn").addEventListener("click", async function () {
         if (!currentGpxData) return;
+        const overlay = document.getElementById('overlay');
+        overlay.style.display = 'flex';
 
         const routesURL = "http://127.0.0.1:8000/routes"; // Still hardcoded with experimental setup
 
@@ -424,6 +450,8 @@
 
         } catch (error) {
           console.error("API Error:", error);
+        } finally {
+          overlay.style.display = 'none'
         }
       });
     </script>

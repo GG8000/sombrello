@@ -20,8 +20,9 @@ python -m uvicorn sombrello.api.main:app --reload
 ## Quickstart (frontend)
 ```bash
 cd frontend/
-open index.html
+python3 -m http.server 5000
 ```
+For local deployment (localhost), the map provider does not need an api key
 
 ## Team
 - Gedeon: solar position, API, UV exposure, frontend demonstrator
