@@ -17,6 +17,12 @@ pip install -e ".[dev]"
 python -m uvicorn sombrello.api.main:app --reload
 ```
 
+## Quickstart (frontend)
+```bash
+cd frontend/
+open index.html
+```
+
 ## Team
 - Gedeon: solar position, API, UV exposure, frontend demonstrator
 - Emil: GIS pipeline, raycasting shadow algorithm, GPX metadata
