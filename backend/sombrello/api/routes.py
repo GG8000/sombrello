@@ -6,6 +6,7 @@ from sombrello.solar.solar import sun_position
 from sombrello.uv import uv_index_calculation, uvi_effective
 from sombrello.models.trackpoint import Trackpoint, TrackpointEnriched
 from sombrello.gpx import enrich, gpx_to_trackpoint_list, trackpoints_to_gpx
+from sombrello.config import get_settings, Settings
 from fastapi import Request
 from gpxpy.gpx import GPXXMLSyntaxException
 import json
@@ -24,6 +25,14 @@ class RouteData(BaseModel):
 _routes : dict[str, RouteData] = {}
 
 router = APIRouter()
+
+
+def _enrich_all(trackpoints: list[Trackpoint]) -> list[TrackpointEnriched]:
+    """Enrich a list of trackpoints, loading GIS dataset settings once
+    for the whole route rather than once per point."""
+    settings: Settings = get_settings()
+    return [enrich(tp, settings) for tp in trackpoints]
+
 
 @router.get("/health")
 def health():
@@ -72,7 +81,7 @@ def get_enriched_route(id : str) -> Response:
         raise HTTPException(status_code=404, detail="Route not found") 
     
     trackpoints = _routes[id].trackpoints
-    trackpoints_enriched = [enrich(tp) for tp in trackpoints]
+    trackpoints_enriched = _enrich_all(trackpoints)
     enriched_gpx = trackpoints_to_gpx(trackpoints=trackpoints_enriched, gpx_string=_routes[id].gpx_string)
     return Response(content=enriched_gpx, media_type="application/gpx+xml")
 
@@ -93,6 +102,6 @@ def get_enriched_route_json(id : str) -> list[TrackpointEnriched]:
         raise HTTPException(status_code=404, detail="Route not found")
     
     trackpoints = _routes[id].trackpoints
-    trackpoints_enriched = [enrich(tp) for tp in trackpoints]
+    trackpoints_enriched = _enrich_all(trackpoints)
     
     return trackpoints_enriched

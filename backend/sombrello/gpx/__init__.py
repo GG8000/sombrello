@@ -1,7 +1,8 @@
-from sombrello.shadow import shadow_index
+from sombrello.shadow.raycasting import shadow_index
 from sombrello.solar.solar import sun_position
 from sombrello.uv import uv_index_calculation, uvi_effective
 from sombrello.models.trackpoint import Trackpoint, TrackpointEnriched
+from sombrello.config import Settings, get_settings
 from datetime import timezone
 import gpxpy
 import gpxpy.gpx
@@ -66,18 +67,22 @@ def trackpoints_to_gpx(trackpoints : list[TrackpointEnriched], gpx_string : str)
     gpx.nsmap["sombrello"] = NS
     return gpx.to_xml(version="1.1")
 
-def enrich(tp : Trackpoint) -> TrackpointEnriched:
+def enrich(tp: Trackpoint, settings: Settings | None = None) -> TrackpointEnriched:
+    settings = settings or get_settings()
     sun = sun_position(tp.lat, tp.lon, tp.timestamp)
-    shadow = shadow_index(tp)
+    shadow = shadow_index(
+        tp,
+        buildings_path=settings.buildings_path,
+        trees_path=settings.trees_path,
+    )
     uvi = uv_index_calculation(
         elevation_deg=sun.elevation_deg,
         altitude_m=tp.elevation_m
     )
     return TrackpointEnriched(
         **tp.model_dump(),
-        sun_elevation_deg = sun.elevation_deg,
-        shadow_index = shadow,
-        uv_index = uvi,
-        uv_effective = uvi_effective(uvi, shadow)
+        sun_elevation_deg=sun.elevation_deg,
+        shadow_index=shadow,
+        uv_index=uvi,
+        uv_effective=uvi_effective(uvi, shadow)
     )
-    
