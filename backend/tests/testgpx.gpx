@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx creator="https://gpx.studio" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.garmin.com/xmlschemas/PowerExtension/v1 http://www.garmin.com/xmlschemas/PowerExtensionv1.xsd http://www.topografix.com/GPX/gpx_style/0/2 http://www.topografix.com/GPX/gpx_style/0/2/gpx_style.xsd" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpxpx="http://www.garmin.com/xmlschemas/PowerExtension/v1" xmlns:gpx_style="http://www.topografix.com/GPX/gpx_style/0/2">
+  <metadata>
+    <name>New file 1</name>
+    <author>
+      <name>gpx.studio</name>
+      <link href="https://gpx.studio"/>
+    </author>
+  </metadata>
+  <trk>
+    <name>New file 1</name>
+    <trkseg>
+      <trkpt lat="48.522809" lon="9.048366">
+        <ele>330</ele>
+        <time>2026-09-13T10:00:00.000Z</time>
+      </trkpt>
+      <trkpt lat="48.522804" lon="9.048534">
+        <ele>330</ele>
+        <time>2026-09-13T10:00:09.096Z</time>
+      </trkpt>
+      <trkpt lat="48.522817" lon="9.049824">
+        <ele>329</ele>
+        <time>2026-09-13T10:01:15.643Z</time>
+      </trkpt>
+      <trkpt lat="48.522847" lon="9.051513">
+        <ele>329</ele>
+        <time>2026-09-13T10:02:44.956Z</time>
+      </trkpt>
+      <trkpt lat="48.522844" lon="9.051876">
+        <ele>329</ele>
+        <time>2026-09-13T10:03:04.592Z</time>
+      </trkpt>
+      <trkpt lat="48.522855" lon="9.052143">
+        <ele>329</ele>
+        <time>2026-09-13T10:03:18.024Z</time>
+      </trkpt>
+      <trkpt lat="48.522949" lon="9.052352">
+        <ele>328.46</ele>
+        <time>2026-09-13T10:03:30.453Z</time>
+      </trkpt>
+      <trkpt lat="48.522983" lon="9.052394">
+        <ele>327.99</ele>
+        <time>2026-09-13T10:03:33.621Z</time>
+      </trkpt>
+      <trkpt lat="48.522965" lon="9.052518">
+        <ele>327.55</ele>
+        <time>2026-09-13T10:03:39.685Z</time>
+      </trkpt>
+      <trkpt lat="48.522968" lon="9.052788">
+        <ele>327.29</ele>
+        <time>2026-09-13T10:03:52.090Z</time>
+      </trkpt>
+      <trkpt lat="48.522984" lon="9.052943">
+        <ele>327</ele>
+        <time>2026-09-13T10:04:00.112Z</time>
+      </trkpt>
+      <trkpt lat="48.523026" lon="9.053208">
+        <ele>327.74</ele>
+        <time>2026-09-13T10:04:14.047Z</time>
+      </trkpt>
+      <trkpt lat="48.52311" lon="9.054496">
+        <ele>327.19</ele>
+        <time>2026-09-13T10:05:23.778Z</time>
+      </trkpt>
+      <trkpt lat="48.523071" lon="9.054503">
+        <ele>327.24</ele>
+        <time>2026-09-13T10:05:26.897Z</time>
+      </trkpt>
+      <trkpt lat="48.523101" lon="9.054966">
+        <ele>327</ele>
+        <time>2026-09-13T10:05:53.736Z</time>
+      </trkpt>
+      <trkpt lat="48.523107" lon="9.055171">
+        <ele>327.91</ele>
+        <time>2026-09-13T10:06:05.934Z</time>
+      </trkpt>
+      <trkpt lat="48.523096" lon="9.055389">
+        <ele>328.44</ele>
+        <time>2026-09-13T10:06:18.959Z</time>
+      </trkpt>
+      <trkpt lat="48.523078" lon="9.055493">
+        <ele>328.75</ele>
+        <time>2026-09-13T10:06:25.993Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

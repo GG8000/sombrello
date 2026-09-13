@@ -166,3 +166,20 @@ def test_no_trackpoints_422(client):
                            content="<?xml version='1.0' encoding='UTF-8'?>\n<gpx version=\"1.1\" creator=\"https://www.komoot.de\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n  <metadata>\n    <name>Testroute-Sombrello</name>\n    <author>\n      <link href=\"https://www.komoot.de\">\n        <text>komoot</text>\n        <type>text/html</type>\n      </link>\n    </author>\n  </metadata>\n  <wpt lat=\"48.545926\" lon=\"9.057296\">\n    <name>T\u00fcbingen Ulmenweg</name>\n    <sym>Flag, Blue</sym>\n  </wpt>\n  <wpt lat=\"48.551085\" lon=\"9.050721\">\n    <name>Naturlehrpfad im Naturpark Sch\u00f6nbuch</name>\n    <sym>Flag, Blue</sym>\n  </wpt>\n  <trk>\n    <name>Testroute-Sombrello</name>\n    <type>hike</type>\n    <trkseg></gpx>",
                            headers={"Content-Type": "application/gpx+xml"})
     assert response.status_code == 422
+
+def test_get_enriched_route_preserves_track_metadata(client, route_id):
+    response = client.get(f"/routes/{route_id}")
+    assert response.status_code == 200
+    assert "Testroute-Sombrello" in response.text
+
+
+def test_missing_timestamp_returns_422(client):
+    trackpoints_xml = """
+    <trkpt lat="47.70" lon="13.04">
+        <ele>424.0</ele>
+    </trkpt>
+    """
+    gpx = gpx_test_string.format(trackpoints_xml=trackpoints_xml)
+    response = client.post("/routes", content=gpx, headers={"Content-Type": "application/xml"})
+    assert response.status_code == 422
+    assert "timestamp" in response.json()["detail"].lower()
