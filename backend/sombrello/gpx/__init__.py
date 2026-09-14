@@ -155,8 +155,7 @@ def enrich(tp: Trackpoint, settings: Settings | None = None) -> TrackpointEnrich
         trees_path=settings.trees_path,
     )
     uvi = uv_index_calculation(
-        elevation_deg=sun.elevation_deg,
-        altitude_m=tp.elevation_m
+        elevation_deg=sun.elevation_deg
     )
     return TrackpointEnriched(
         **tp.model_dump(),
