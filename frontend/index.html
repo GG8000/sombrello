@@ -14,6 +14,7 @@
       rel="stylesheet"
     />
     <style>
+      /* Style for the html document */
       body {
         font-family: serif;
         margin: 0;
@@ -200,7 +201,9 @@
     </style>
   </head>
   <body>
+    // -------- HEADER --------
     <header class="heading">Sombrello-Demo</header>
+    // Loader with sun and cloud
     <div id="overlay" class="overlay">
       <svg viewBox="0 0 120 100" width="200" height="125">
         <circle class="sun" cx="55" cy="42" r="20" fill="#F0997B"/>
@@ -211,6 +214,7 @@
         </g>
       </svg>
     </div>
+    // -------- Content --------
     <div class="content">
       <div class="map-section">
         <div id="map"></div>
@@ -264,6 +268,7 @@
       </div>
     </div>
 
+    // -------- FOOTER --------
     <footer>
       <img src="public/cde_master.png" height="40" alt="CDE Logo" />
       <img src="public/plus_logo.jpg" height="40" alt="PLUS Logo" />
@@ -317,9 +322,9 @@
         },
       ).addTo(map);
 
-      let currentGpxData = null; // Speichert den rohen Datei-Inhalt für die API
+      let currentGpxData = null;
 
-      // 1. GPX Hochladen und anzeigen
+      // 1. Upload GPX
       document
         .getElementById("gpxInput")
         .addEventListener("change", function (e) {
@@ -386,14 +391,14 @@
       }
 
       function shadowColor(index) {
-        /* Assign color to shadow index */
+        // Assign color to shadow index
         if (index == 1) return "#2c3e6b";
         if (index < 1) return "#e8b33a";
         return "#e86a2a";
       }
 
       function update_shadow_stats(enriched) {
-        /* Calculate the statistics from the enriched route */
+        // Calculate the statistics from the enriched route
         let avgUVIndex = 0;
         let avgShadow = 0;
         let maxUV = -100;
