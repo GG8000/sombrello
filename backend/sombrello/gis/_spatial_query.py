@@ -1,3 +1,5 @@
+# gis/_spatial_query.py
+
 import geopandas as gpd
 from functools import lru_cache
 from shapely.geometry import Point
@@ -6,10 +8,6 @@ from shapely.validation import make_valid
 
 @lru_cache(maxsize=4)
 def load_layer(path: str, layer: str | None = None) -> gpd.GeoDataFrame:
-    """
-    Load and cache a vector layer, reprojected to WGS84 (EPSG:4326)
-    with invalid geometries repaired.
-    """
     gdf = gpd.read_file(path, layer=layer)
 
     if gdf.crs is not None and gdf.crs.to_epsg() != 4326:
@@ -25,13 +23,10 @@ def load_layer(path: str, layer: str | None = None) -> gpd.GeoDataFrame:
 
 @lru_cache(maxsize=4)
 def load_layer_projected(path: str, layer: str | None = None) -> gpd.GeoDataFrame:
-    """
-    Same as load_layer, but pre-reprojected to EPSG:3857 (metres) and
-    cached separately, so repeated spatial queries don't re-reproject
-    the whole dataset on every call.
-    """
     gdf = load_layer(path, layer=layer)
-    return gdf.to_crs(epsg=3857)
+    projected = gdf.to_crs(epsg=3857)
+    _ = projected.sindex  # force-build the spatial index once, up front
+    return projected
 
 
 def query_nearby(
@@ -41,13 +36,16 @@ def query_nearby(
     radius_m: float,
     layer: str | None = None,
 ) -> gpd.GeoDataFrame:
-    """
-    Return features within radius_m metres of (lat, lon), in WGS84.
-    """
     gdf_m = load_layer_projected(path, layer=layer)
 
     point_m = gpd.GeoSeries([Point(lon, lat)], crs=4326).to_crs(epsg=3857).iloc[0]
     buffer = point_m.buffer(radius_m)
-    nearby = gdf_m[gdf_m.intersects(buffer)]
+
+    # Use the spatial index to get only candidate rows near the buffer's
+    # bounding box first, THEN do the precise intersects check on that
+    # much smaller subset — instead of checking every row in the dataset.
+    possible_idx = list(gdf_m.sindex.intersection(buffer.bounds))
+    candidates = gdf_m.iloc[possible_idx]
+    nearby = candidates[candidates.intersects(buffer)]
 
     return nearby.to_crs(epsg=4326)
