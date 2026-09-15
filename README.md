@@ -37,5 +37,5 @@ python3 -m http.server 5000
 For local deployment (localhost), the map provider does not need an api key
 
 ## Team
-- Gedeon: solar position, API, UV exposure, frontend demonstrator
+- Gedeon: solar position, API, UV exposure, frontend demonstrator, testing
 - Emil: GIS pipeline, raycasting shadow algorithm, GPX metadata
