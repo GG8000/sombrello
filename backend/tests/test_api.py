@@ -1,5 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
+import geopandas as gpd
+
 from sombrello.api.main import app
 
 gpx_test_string = """<?xml version='1.0' encoding='UTF-8'?>
@@ -49,6 +51,24 @@ VALID_TRACKPOINTS = [
     {"lat" : 47.73, "lon" : 13.05, "elevation_m" : 427.0, "timestamp" : "2027-06-21T12:09:00+00:00"},
 
 ]
+
+
+@pytest.fixture(autouse=True)
+def use_empty_gis_datasets(monkeypatch, tmp_path):
+    """
+    Points the GIS pipeline at empty, temporary building/tree datasets
+    for every test in this file, so enrichment succeeds without depending
+    on real .gpkg files being present on disk.
+    """
+    buildings_path = tmp_path / "empty_buildings.gpkg"
+    trees_path = tmp_path / "empty_trees.gpkg"
+
+    empty_gdf = gpd.GeoDataFrame({"height": []}, geometry=[], crs="EPSG:4326")
+    empty_gdf.to_file(buildings_path, driver="GPKG")
+    empty_gdf.to_file(trees_path, driver="GPKG")
+
+    monkeypatch.setenv("SOMBRELLO_BUILDINGS_PATH", str(buildings_path))
+    monkeypatch.setenv("SOMBRELLO_TREES_PATH", str(trees_path))
 
 
 @pytest.fixture
@@ -146,3 +166,20 @@ def test_no_trackpoints_422(client):
                            content="<?xml version='1.0' encoding='UTF-8'?>\n<gpx version=\"1.1\" creator=\"https://www.komoot.de\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n  <metadata>\n    <name>Testroute-Sombrello</name>\n    <author>\n      <link href=\"https://www.komoot.de\">\n        <text>komoot</text>\n        <type>text/html</type>\n      </link>\n    </author>\n  </metadata>\n  <wpt lat=\"48.545926\" lon=\"9.057296\">\n    <name>T\u00fcbingen Ulmenweg</name>\n    <sym>Flag, Blue</sym>\n  </wpt>\n  <wpt lat=\"48.551085\" lon=\"9.050721\">\n    <name>Naturlehrpfad im Naturpark Sch\u00f6nbuch</name>\n    <sym>Flag, Blue</sym>\n  </wpt>\n  <trk>\n    <name>Testroute-Sombrello</name>\n    <type>hike</type>\n    <trkseg></gpx>",
                            headers={"Content-Type": "application/gpx+xml"})
     assert response.status_code == 422
+
+def test_get_enriched_route_preserves_track_metadata(client, route_id):
+    response = client.get(f"/routes/{route_id}")
+    assert response.status_code == 200
+    assert "Testroute-Sombrello" in response.text
+
+
+def test_missing_timestamp_returns_422(client):
+    trackpoints_xml = """
+    <trkpt lat="47.70" lon="13.04">
+        <ele>424.0</ele>
+    </trkpt>
+    """
+    gpx = gpx_test_string.format(trackpoints_xml=trackpoints_xml)
+    response = client.post("/routes", content=gpx, headers={"Content-Type": "application/xml"})
+    assert response.status_code == 422
+    assert "timestamp" in response.json()["detail"].lower()
